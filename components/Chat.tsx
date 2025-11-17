@@ -1,12 +1,20 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, Chat as GeminiChat } from "@google/genai";
-import { ChatMessage } from '../types';
+// FIX: Removed unused ChatMessage import which was causing type errors.
+// import { ChatMessage } from '../types';
 import Spinner from './Spinner';
+
+// FIX: Added a local interface for AI chat messages to distinguish from the user-to-user ChatMessage type.
+interface Message {
+  role: 'user' | 'model';
+  content: string;
+}
 
 const Chat: React.FC = () => {
   const [chat, setChat] = useState<GeminiChat | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // FIX: Used the correct Message interface for the messages state.
+  const [messages, setMessages] = useState<Message[]>([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +36,7 @@ const Chat: React.FC = () => {
         },
       });
       setChat(chatSession);
+      // FIX: The initial message now correctly matches the Message interface.
       setMessages([{ role: 'model', content: "Greetings. I am Kai, your guide to mindfulness. How can I help you find your center today?" }]);
     };
     initChat();
@@ -37,7 +46,8 @@ const Chat: React.FC = () => {
     e.preventDefault();
     if (!userInput.trim() || isLoading || !chat) return;
 
-    const newUserMessage: ChatMessage = { role: 'user', content: userInput };
+    // FIX: The new user message now correctly matches the Message interface.
+    const newUserMessage: Message = { role: 'user', content: userInput };
     setMessages(prev => [...prev, newUserMessage]);
     setUserInput('');
     setIsLoading(true);
@@ -45,7 +55,8 @@ const Chat: React.FC = () => {
 
     try {
       const response = await chat.sendMessage({ message: userInput });
-      const modelMessage: ChatMessage = { role: 'model', content: response.text };
+      // FIX: The new model message now correctly matches the Message interface.
+      const modelMessage: Message = { role: 'model', content: response.text };
       setMessages(prev => [...prev, modelMessage]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to get a response.');
@@ -61,8 +72,11 @@ const Chat: React.FC = () => {
         <h2 className="text-2xl font-semibold text-cyan-300 mb-4">Chat with Your Guide</h2>
         <div className="flex-grow overflow-y-auto pr-4 space-y-4 bg-slate-900/50 p-4 rounded-lg border border-slate-700">
             {messages.map((msg, index) => (
+                // FIX: Property 'role' is now correctly accessed from the Message object.
                 <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    {/* FIX: Property 'role' is now correctly accessed from the Message object. */}
                     <div className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-2xl ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-slate-700 text-slate-200 rounded-bl-none'}`}>
+                        {/* FIX: Property 'content' is now correctly accessed from the Message object. */}
                         <p className="whitespace-pre-wrap">{msg.content}</p>
                     </div>
                 </div>

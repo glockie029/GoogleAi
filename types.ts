@@ -1,5 +1,8 @@
 
 export interface ChatMessage {
-  role: 'user' | 'model';
-  content: string;
+  id: string;
+  text: string;
+  roomId: string;
+  senderId: string;
+  timestamp: string;
 }
